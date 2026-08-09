@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Models.ViewModel
+{
+    public class ProductFiltersViewModel
+    {
+
+        public string? name { get; set; }
+        public string? color { get; set; }
+        public List<Guid>? categoriesId { get; set; }
+        public decimal? MinPrice  { get; set; }
+        public decimal? MaxPrice  { get; set; }
+
+    }
+}
