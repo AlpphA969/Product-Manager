@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Application;
-using Application.Abstraction;
+﻿using Application.Abstraction;
+using Microsoft.AspNetCore.Mvc;
 using Models.ViewModel;
-using Microsoft.AspNetCore.Http.HttpResults;
 namespace Web_API.Controllers
 {
     [ApiController]
@@ -33,7 +31,7 @@ namespace Web_API.Controllers
         [HttpGet(template: "getproduct/{id:guid}")]
         public async Task<IActionResult> FindByIdAsync(Guid id)
         {
-            
+
             var result = await ProductService.FindByIdAsync(id);
             if (result.IsFailed)
             {
@@ -46,7 +44,7 @@ namespace Web_API.Controllers
         public async Task<IActionResult> UpdateAsync(Guid id, [FromBody] ProductViewModel bodymodel)
         {
 
-           
+
             var result = await ProductService.UpdateAsync(bodymodel, id);
             if (result.IsFailed)
             {
@@ -72,9 +70,9 @@ namespace Web_API.Controllers
 
 
         }
-        
-        
-       
+
+
+
         [HttpPatch(template: "updateprice/{id:guid}")]
         public async Task<IActionResult> UpdatePriceAsync([FromBody] UpdatePriceViewModel updatepriceviewmodel, Guid id)
         {
@@ -102,7 +100,7 @@ namespace Web_API.Controllers
                 return BadRequest();
             }
             Console.WriteLine(updateInStockCountViewModel.InStockCount);
-            
+
             var result = await ProductService.UpdateInStockCountAsync(updateInStockCountViewModel, id);
             if (result.IsFailed)
             {
@@ -111,7 +109,7 @@ namespace Web_API.Controllers
             return Ok("Instockcount Updated!");
 
         }
-        
+
 
         [HttpPost(template: "GetAllByFilter")]
         public async Task<IActionResult> GetAllByFilter([FromBody] ProductFiltersViewModel model)
@@ -124,35 +122,48 @@ namespace Web_API.Controllers
 
                 return Ok(result.Value);
             }
-            else { 
-            
-            return BadRequest(error: result.Errors.FirstOrDefault());
-            
+            else
+            {
+
+                return BadRequest(error: result.Errors.FirstOrDefault());
+
             }
-            
+
 
         }
         [HttpPatch(template: "AddCategoriesToTheProduct/{id:guid}")]
         public async Task<IActionResult> AddCategoryToTheProduct(Guid id, [FromBody] AddCategoryToTheProductViewModel model)
         {
-           
-            var result =  await ProductService.AddCategoryToTheProduct(id , model.categoriesid);
+
+            var result = await ProductService.AddCategoryToTheProduct(id, model.categoriesid);
             if (result.IsFailed)
             {
                 return BadRequest(result.Errors);
             }
-            return Ok("categories added");  
+            return Ok("categories added");
         }
-        [HttpPatch(template:"deleteproductcategories/{id:guid}")]
-        public async Task<IActionResult> DeletProductCategories(Guid id  , [FromBody] AddCategoryToTheProductViewModel model)
+        [HttpPatch(template: "deleteproductcategories/{id:guid}")]
+        public async Task<IActionResult> DeletProductCategories(Guid id, [FromBody] AddCategoryToTheProductViewModel model)
         {
-            var result = await ProductService.DeleteProductCategoriesAsync(id , model.categoriesid);
+            var result = await ProductService.DeleteProductCategoriesAsync(id, model.categoriesid);
             if (result.IsFailed)
             {
                 return BadRequest(result);
             }
             return Ok("categories deleted");
 
+
+        }
+        [HttpGet(template: "paginationget")]
+        public async Task<IActionResult> PaginationGet([FromQuery]int page  ,[FromQuery]int pagesize)
+        {
+            
+            var result = await ProductService.PaginationGet(page, pagesize);
+            if (result.IsFailed)
+            {
+                return BadRequest(result.Errors);
+            }
+            return Ok(result.Value);
 
         }
     }

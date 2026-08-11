@@ -38,6 +38,8 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
     }
 
+    
+
     public async Task PriceUpdateAsync(Product product)
     {
         await Task.Run(() => DbSet.Update(product));
@@ -49,4 +51,5 @@ public class ProductRepository : Repository<Product>, IProductRepository
     {
         await Task.Run(() => DbSet.Update(product));
     }
+
 }

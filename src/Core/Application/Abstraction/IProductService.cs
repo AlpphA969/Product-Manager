@@ -15,6 +15,7 @@ public interface IProductService
     Task<Result> UpdateInStockCountAsync(UpdateInStockCountViewModel updateInStockCountViewModel, Guid id);
     Task<Result> AddCategoryToTheProduct(Guid id, List<string> categoriesid);
     Task<Result> DeleteProductCategoriesAsync(Guid id, List<string> categoriesid);
+    Task<Result<PageResultViewModel<ProductViewModel>>> PaginationGet(int page, int pagesize);
 
 
 

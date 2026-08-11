@@ -10,4 +10,6 @@ public interface IRepository<T> where T : BaseEntity
     Task<T?> FindByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<bool> RemoveByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IList<T>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<List<T>> PaginationGet(int page, int pagesize, CancellationToken cancellationToken = default);
+    Task<int> CountAsync(CancellationToken cancellationToken = default);
 }
