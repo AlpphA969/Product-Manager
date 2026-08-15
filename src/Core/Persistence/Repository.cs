@@ -81,16 +81,6 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         var result = await DbSet.CountAsync(cancellationToken);
         return result;
     }
-    //public virtual async Task SoftDeleteAsync(T entity  , CancellationToken cancellationToken = default)
-    //{
-    //    entity.IsDeleted = true;
-    //    entity.DeletedAt = DateTime.UtcNow;
-    //    await Task.Run(() =>
-    //            DbSet.Update(entity)
-    //        , cancellationToken
-    //    );
-        
-
-    //}
+   
 
 }
