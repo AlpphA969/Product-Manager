@@ -306,7 +306,6 @@ public class ProductService : IProductService
         }
         int totalcount =await  UnitOfWork.ProductRepository.CountAsync();
         int pagecount = (int)Math.Ceiling((double)totalcount / pagesize);
-
         var products = await UnitOfWork.ProductRepository.PaginationGet(page: page, pagesize: pagesize);
         if(products == null)
         {

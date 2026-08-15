@@ -1,4 +1,5 @@
 using Domain.Base;
+using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Persistence.Abstraction;
 
@@ -69,15 +70,27 @@ public class Repository<T> : IRepository<T> where T : BaseEntity
         return result;
     }
 
-    public async Task<List<T>> PaginationGet(int page, int pagesize, CancellationToken cancellationToken = default)
+    public virtual async Task<List<T>> PaginationGet(int page, int pagesize, CancellationToken cancellationToken = default)
     {
         var result =await DbSet.OrderBy(x=>x.Id).Skip((page-1)*pagesize).Take(pagesize).ToListAsync(cancellationToken);
         return result;
     }
 
-    public async Task<int> CountAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<int> CountAsync(CancellationToken cancellationToken = default)
     {
         var result = await DbSet.CountAsync(cancellationToken);
         return result;
     }
+    //public virtual async Task SoftDeleteAsync(T entity  , CancellationToken cancellationToken = default)
+    //{
+    //    entity.IsDeleted = true;
+    //    entity.DeletedAt = DateTime.UtcNow;
+    //    await Task.Run(() =>
+    //            DbSet.Update(entity)
+    //        , cancellationToken
+    //    );
+        
+
+    //}
+
 }
