@@ -293,38 +293,44 @@ public class ProductService : IProductService
     public async Task<Result<PageResultViewModel<ProductViewModel>>> PaginationGet(int page, int pagesize)
     {
         var result = new Result<PageResultViewModel<ProductViewModel>>();
-        if (pagesize < 1 || pagesize>50) 
+        if (pagesize < 1 || pagesize > 50)
         {
 
             return result.WithError("pagesize must be between 1 to 50 ");
-            
+
         }
         if (page <= 0)
         {
             return result.WithError("page must be more than 0");
 
         }
-        int totalcount =await  UnitOfWork.ProductRepository.CountAsync();
+        int totalcount = await UnitOfWork.ProductRepository.CountAsync();
         int pagecount = (int)Math.Ceiling((double)totalcount / pagesize);
         var products = await UnitOfWork.ProductRepository.PaginationGet(page: page, pagesize: pagesize);
-        if(products == null)
+        if (products == null)
         {
             return result.WithError("Nothing Found!");
         }
         var models = Mapper.Map<List<ProductViewModel>>(products);
         var pageresults = new PageResultViewModel<ProductViewModel>()
         {
-            data = models , 
+            data = models,
             TotalCount = totalcount,
-            PageIndex = page, 
+            PageIndex = page,
             PageCount = pagecount,
-            
+
         };
         return result.WithValue(pageresults);
-        
+
 
 
 
 
     }
 }
+
+
+
+
+
+
