@@ -164,7 +164,7 @@ public class ProductService : IProductService
 
             var Model = Mapper.Map<List<ProductViewModel>>(Products);
             var PageResult = new PageResultViewModel<ProductViewModel>();
-            
+            PageResult.TotalCount = Model.Count;
             PageResult.data = Model;
             
             result.WithValue(PageResult);
