@@ -6,7 +6,7 @@ namespace Application.Abstraction;
 
 public interface IProductService
 {
-    Task<Result<List<ProductViewModel>>> GetAllProductsAsync(ProductFiltersViewModel query , CancellationToken cancellationToken = default);
+    Task<Result<PageResultViewModel<ProductViewModel>>> GetAllProductsAsync(ProductFiltersViewModel query ,int page , int pagesize ,  CancellationToken cancellationToken = default);
     Task<Result> AddProductAsync(ProductViewModel productviewmodel);
     Task<Result<ProductViewModel>> FindByIdAsync(Guid id);
     Task<Result> UpdateAsync(ProductViewModel productviewmodel , Guid id );

@@ -1,8 +1,10 @@
 using Application.Abstraction;
 using AutoMapper;
+using Azure;
 using Domain.Entity;
 using FluentResults;
 using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Abstractions;
 using Models.ViewModel;
 using Persistence;
 
@@ -140,27 +142,73 @@ public class ProductService : IProductService
 
     }
 
-    public async Task<Result<List<ProductViewModel>>> GetAllProductsAsync(ProductFiltersViewModel query, CancellationToken cancelationToke)
+    public async Task<Result<PageResultViewModel<ProductViewModel>>> GetAllProductsAsync(ProductFiltersViewModel query , int page , int pagesize, CancellationToken cancelationToke)
     {
 
-        var result = new Result<List<ProductViewModel>>();
+        var result = new Result<PageResultViewModel<ProductViewModel>>();
+        // filter proccess only
+        if(page==  0 && pagesize == 0)
+        {
+            if (query.MaxPrice != null && query.MinPrice != null && query.MaxPrice < query.MinPrice)
+            {
 
+                result.WithError("Minprice cant be more than Maxprice");
+                return result;
+            }
+            
+
+
+
+            var Products = await UnitOfWork.ProductRepository.GetAllAsync(query, page, pagesize, cancelationToke);
+
+
+            var Model = Mapper.Map<List<ProductViewModel>>(Products);
+            var PageResult = new PageResultViewModel<ProductViewModel>();
+            
+            PageResult.data = Model;
+            
+            result.WithValue(PageResult);
+
+            return result;
+
+
+
+        }
+        if (pagesize < 1 || pagesize > 50)
+        {
+
+            return result.WithError("pagesize must be between 1 to 50 ");
+
+        }
+        if (page <= 0)
+        {
+            return result.WithError("page must be more than 0");
+
+        }
         if (query.MaxPrice != null && query.MinPrice != null && query.MaxPrice < query.MinPrice)
         {
 
             result.WithError("Minprice cant be more than Maxprice");
             return result;
         }
+        
+       
 
 
-        var products = await UnitOfWork.ProductRepository.GetAllAsync(query, cancelationToke);
 
-
-        var productViewModel = Mapper.Map<List<ProductViewModel>>(products);
-
-        result.WithValue(productViewModel);
-
+        var products = await UnitOfWork.ProductRepository.GetAllAsync(query, page, pagesize, cancelationToke);
+        int totalcount = await UnitOfWork.ProductRepository.CountAsync(query, cancelationToke);
+        int pagecount = (int)Math.Ceiling((double)totalcount / pagesize);
+        var model = Mapper.Map<List<ProductViewModel>>(products);
+        var pageresult = new PageResultViewModel<ProductViewModel>();
+        pageresult.TotalCount = totalcount;
+        pageresult.PageCount = pagecount;
+        pageresult.data = model;
+        pageresult.PageIndex = page;
+        result.WithValue(pageresult);
         return result;
+
+
 
     }
 
