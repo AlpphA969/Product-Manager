@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Models.ViewModel
 {
-    public class CategoryViewModel : BaseEntity
+    public class CategoryViewModel : BaseViewModel
     {
        
         public string Name { get; set; }

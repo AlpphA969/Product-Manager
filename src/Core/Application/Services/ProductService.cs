@@ -7,6 +7,7 @@ using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Abstractions;
 using Models.ViewModel;
 using Persistence;
+using Persistence.Abstraction;
 
 namespace Application.Services;
 
@@ -16,9 +17,14 @@ public class ProductService : IProductService
     {
         Mapper = mapper;
         UnitOfWork = unitofwork;
+        ProductRepository = unitofwork.ProductRepository;
+        CategoryRepository = unitofwork.CategoryRepository;
 
     }
     private IMapper Mapper { get; }
+
+    IProductRepository ProductRepository { get; }
+    ICategoryRepository CategoryRepository { get; }
     private IUnitOfWork UnitOfWork { get; }
     public async Task<Result> AddProductAsync(ProductViewModel productviewmodel)
     {
@@ -29,7 +35,7 @@ public class ProductService : IProductService
 
         // اضاف کردن پرداکت ای دی ها به پروداکت کتگوری
 
-        var categories = await UnitOfWork.CategoryRepository.FindByCategoriesId(productviewmodel.CategoriesId);
+        var categories = await CategoryRepository.FindByCategoriesId(productviewmodel.CategoriesId);
 
         if (categories.Count != productviewmodel.CategoriesId.Count)
         {
@@ -144,72 +150,16 @@ public class ProductService : IProductService
 
     public async Task<Result<PageResultViewModel<ProductViewModel>>> GetAllProductsAsync(ProductFiltersViewModel query , int page , int pagesize, CancellationToken cancelationToke)
     {
-
         var result = new Result<PageResultViewModel<ProductViewModel>>();
-        // filter proccess only
-        if(page==  0 && pagesize == 0)
+        if(query.MinPrice >= query.MaxPrice)
         {
-            if (query.MaxPrice != null && query.MinPrice != null && query.MaxPrice < query.MinPrice)
-            {
-
-                result.WithError("Minprice cant be more than Maxprice");
-                return result;
-            }
-            
-
-
-
-            var Products = await UnitOfWork.ProductRepository.GetAllAsync(query, page, pagesize, cancelationToke);
-
-
-            var Model = Mapper.Map<List<ProductViewModel>>(Products);
-            var PageResult = new PageResultViewModel<ProductViewModel>();
-            PageResult.TotalCount = Model.Count;
-            PageResult.data = Model;
-            
-            result.WithValue(PageResult);
-
-            return result;
-
-
-
-        }
-        if (pagesize < 1 || pagesize > 50)
-        {
-
-            return result.WithError("pagesize must be between 1 to 50 ");
-
-        }
-        if (page <= 0)
-        {
-            return result.WithError("page must be more than 0");
-
-        }
-        if (query.MaxPrice != null && query.MinPrice != null && query.MaxPrice < query.MinPrice)
-        {
-
-            result.WithError("Minprice cant be more than Maxprice");
             return result;
         }
-        
-       
+        var pageresult = await ProductRepository.GetAllAsync(query, page, pagesize, cancelationToke);
+        var pageresultviewmodel = Mapper.Map<PageResultViewModel<ProductViewModel>>(pageresult);
+        return pageresultviewmodel;
 
-
-
-        var products = await UnitOfWork.ProductRepository.GetAllAsync(query, page, pagesize, cancelationToke);
-        int totalcount = await UnitOfWork.ProductRepository.CountAsync(query, cancelationToke);
-        int pagecount = (int)Math.Ceiling((double)totalcount / pagesize);
-        var model = Mapper.Map<List<ProductViewModel>>(products);
-        var pageresult = new PageResultViewModel<ProductViewModel>();
-        pageresult.TotalCount = totalcount;
-        pageresult.PageCount = pagecount;
-        pageresult.data = model;
-        pageresult.PageIndex = page;
-        result.WithValue(pageresult);
-        return result;
-
-
-
+   
     }
 
 

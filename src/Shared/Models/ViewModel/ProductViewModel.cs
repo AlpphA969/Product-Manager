@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Models.ViewModel
 {
     
-    public class ProductViewModel : Base.BaseEntity
+    public class ProductViewModel : Base.BaseViewModel
     {
         public ProductViewModel(string color, string name) : base()
         {

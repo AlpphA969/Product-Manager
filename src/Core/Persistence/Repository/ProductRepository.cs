@@ -3,6 +3,7 @@ using Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using Models.ViewModel;
 using Persistence.Abstraction;
+using System.Runtime.CompilerServices;
 namespace Persistence.Repository;
 
 public class ProductRepository : Repository<Product>, IProductRepository
@@ -12,13 +13,13 @@ public class ProductRepository : Repository<Product>, IProductRepository
         DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
 
         DbSet = databaseContext.Set<Product>();
-        
+
 
     }
-    internal DatabaseContext Databasecontext { get;  }
-    private  DbSet<Product> DbSet { get; }
+    internal DatabaseContext Databasecontext { get; }
+    private DbSet<Product> DbSet { get; }
 
-    public async Task<List<Product>> GetAllAsync(ProductFiltersViewModel query,int page , int pagesize, CancellationToken cancellationToken = default)
+    public async Task<PageDataModel<Product>> GetAllAsync(ProductFiltersViewModel query, int page, int pagesize, CancellationToken cancellationToken = default)
     {
         var productsQuery = DbSet
             .Where(x => query.name == null || x.Name.Contains(query.name))
@@ -28,31 +29,34 @@ public class ProductRepository : Repository<Product>, IProductRepository
 
         if (query.categoriesId != null && query.categoriesId.Any())
         {
-         productsQuery = productsQuery.Where(x => x.ProductCategories.Where(c => query.categoriesId.Contains(c.CategoryId)).Any());
+            productsQuery = productsQuery.Where(x => x.ProductCategories.Where(c => query.categoriesId.Contains(c.CategoryId)).Any());
         }
-        // pagination
-        if(page !=0 && pagesize !=0)
-        {
-
-            productsQuery = productsQuery.OrderBy(x => x.Id).Skip((page - 1) * pagesize).Take(pagesize);
-
-        }
+       
 
 
-        var products = await productsQuery.ToListAsync(cancellationToken);
+
+        var products = await productsQuery
+            .OrderBy(x => x.Id)
+            .ToPageDataAsync(pageSize: pagesize, pageNumber: page
+            , cancellationToken);
+
+
 
 
         return products;
 
     }
 
-    
+
+
+
+
 
     public async Task PriceUpdateAsync(Product product)
     {
         await Task.Run(() => DbSet.Update(product));
-       
-        
+
+
     }
 
     public async Task UpdateInStockCountAsync(Product product)
@@ -71,4 +75,30 @@ public class ProductRepository : Repository<Product>, IProductRepository
             .CountAsync(cancellationToken);
     }
 
+}
+
+public static class test
+{
+    public static async Task<PageDataModel<T>> ToPageDataAsync<T>(this IQueryable<T> queryable, 
+        int pageSize,
+        int pageNumber,
+        CancellationToken cancellation = default) where T : Domain.Base.BaseEntity
+    {
+
+        var totalCount = await queryable.CountAsync(cancellation);
+
+         queryable = queryable.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+
+        var data = await queryable.ToListAsync(cancellation);
+
+        var pagedDataModel = new PageDataModel<T>(pageSize , totalCount , pageNumber , data)
+        {
+            data = data,
+            TotalCount = totalCount,
+            PageIndex = pageNumber,
+            PageCount = (int)Math.Ceiling((double)totalCount / pageSize),
+        };
+
+        return pagedDataModel;
+    }
 }

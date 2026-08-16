@@ -9,6 +9,8 @@ namespace Infrastructure.AutoMapperProfiles
         public ProductProfile():base()
         {
             CreateMap<ProductViewModel, Product>().ReverseMap();
+
+            CreateMap<PageDataModel<Product>, PageResultViewModel<ProductViewModel>>();
                 
             
 

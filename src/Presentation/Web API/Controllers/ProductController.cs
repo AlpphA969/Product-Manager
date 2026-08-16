@@ -112,10 +112,10 @@ namespace Web_API.Controllers
 
 
         [HttpPost(template: "GetAllByFilter")]
-        public async Task<IActionResult> GetAllByFilter([FromBody] ProductFiltersViewModel model ,  [FromQuery] int page, [FromQuery] int pagesize)
+        public async Task<IActionResult> GetAllByFilter([FromBody] ProductFiltersViewModel model)
         {
 
-            var result = await ProductService.GetAllProductsAsync(model , page , pagesize);
+            var result = await ProductService.GetAllProductsAsync(model , model.Page,model.PageSize);
 
             if (result.IsSuccess)
             {

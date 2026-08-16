@@ -12,7 +12,9 @@ namespace Infrastructure.AutoMapperProfiles
     {
         public CategoryProfile()
         {
-            CreateMap<CategoryViewModel, Category>();
+            CreateMap<CategoryViewModel, Category>()
+                
+                ;
         }
 
     }

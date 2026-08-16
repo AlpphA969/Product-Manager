@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Models.Base;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Versioning;
@@ -7,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace Models.ViewModel
 {
-    public class PageResultViewModel<T> : object
+    public class PageResultViewModel<T> : object where T : BaseViewModel
     {
-    
+     
         public int PageIndex { get; set; }
         public int PageCount { get; set; }
         public int TotalCount { get; set; }

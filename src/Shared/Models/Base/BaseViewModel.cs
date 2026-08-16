@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Models.Base
 {
-    public class BaseEntity
+    public class BaseViewModel
     {
-        public BaseEntity()
+        public BaseViewModel()
         {
             Id = Guid.NewGuid();
             CreatedDateTime = DateTime.Now;
