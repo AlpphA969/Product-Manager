@@ -61,7 +61,7 @@ public class ProductService : IProductService
 
         if (product == null)
         {
-            result.WithError("Product Not found");
+             return result.WithError("Product Not found");
         }
         // حذف از جدول پروداکت
         await UnitOfWork.ProductRepository.RemoveAsync(product);
@@ -174,7 +174,7 @@ public class ProductService : IProductService
         var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
         if (product == null)
         {
-            result.WithError("Not Found");
+             return result.WithError("Not Found");
 
         }
         product.Price = updatePriceViewModel.Price;
@@ -189,13 +189,13 @@ public class ProductService : IProductService
         var result = new Result();
         if (updateInStockCountViewModel.InStockCount == 0)
         {
-            result.WithError("InStockCount Requerd");
+             return result.WithError("InStockCount Requerd");
 
         }
         var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
         if (product == null)
         {
-            result.WithError("Not Found");
+           return result.WithError("Not Found");
         }
         product.InStockCount = updateInStockCountViewModel.InStockCount;
         await UnitOfWork.ProductRepository.UpdateInStockCountAsync(product);

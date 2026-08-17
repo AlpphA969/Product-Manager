@@ -9,6 +9,7 @@ namespace Models.ViewModel
     
     public class ProductViewModel : Base.BaseViewModel
     {
+        public ProductViewModel() { }
         public ProductViewModel(string color, string name) : base()
         {
             Color = color;

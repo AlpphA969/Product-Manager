@@ -18,14 +18,15 @@ namespace Web_API.Controllers
 
         public async Task<IActionResult> AddProductAsync([FromBody] ProductViewModel model)
         {
-
-
-
             if (model == null)
             {
                 return BadRequest("product cant be null");
             }
             var result = await ProductService.AddProductAsync(model);
+            if (result.IsFailed)
+            {
+                return BadRequest(result);
+            }
             return Ok(result);
         }
         [HttpGet(template: "getproduct/{id:guid}")]
