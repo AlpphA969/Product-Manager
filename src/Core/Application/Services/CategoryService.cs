@@ -5,6 +5,7 @@ using FluentResults;
 using Microsoft.Identity.Client;
 using Models.ViewModel;
 using Persistence;
+using Persistence.Abstraction;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,9 +20,11 @@ namespace Application.Services
         {
             Mapper = mapper;
             UnitOfWork = unitofwork;
+            CategoryRepository = unitofwork.CategoryRepository;
 
         }
         private IMapper Mapper { get; }
+        private ICategoryRepository CategoryRepository { get; }
         private IUnitOfWork UnitOfWork { get; }
         public async Task<Result> AddCategoryAsync(CategoryViewModel model)
         {
@@ -30,13 +33,13 @@ namespace Application.Services
             {
                return   result.WithError("name cant be null");
             }
-            var CategoryCheck = await UnitOfWork.CategoryRepository.FindByNameAsync(model.Name);
+            var CategoryCheck = await CategoryRepository.FindByNameAsync(model.Name);
             if (CategoryCheck != null)
             {
                 return result.WithError(model.Name + "    Category " + "Already Exists");
             }
             var category = Mapper.Map<Category>(model);
-            await UnitOfWork.CategoryRepository.AddAsync(category );
+            await CategoryRepository.AddAsync(category );
              await UnitOfWork.SaveChangesAsync();
             return result;
             
@@ -44,7 +47,7 @@ namespace Application.Services
         public async Task<Result> UpdateByNameAsync(CategoryViewModel model  , Guid id )
         {
             var result = new Result();
-            var category = await UnitOfWork.CategoryRepository.FindByIdAsync(id);
+            var category = await CategoryRepository.FindByIdAsync(id);
             if (category == null)
             {
                 return result.WithError("Category Not Found");
@@ -56,7 +59,7 @@ namespace Application.Services
             
             category.Name = model.Name;
             category.UpdateDateTime = DateTime.Now;
-            await UnitOfWork.CategoryRepository.UpdateByNameAsync(category);
+            await CategoryRepository.UpdateByNameAsync(category);
             await UnitOfWork.SaveChangesAsync();
             return result;
             
@@ -65,19 +68,19 @@ namespace Application.Services
         public async Task<Result> RemoveByIdAsync(Guid id)
         {
             var result = new Result();
-            var category = await UnitOfWork.CategoryRepository.FindByIdAsync(id);
+            var category = await CategoryRepository.FindByIdAsync(id);
             if (category == null)
             {
                 return result.WithError("Category Not Found");
             }
-            await UnitOfWork.CategoryRepository.RemoveByIdAsync(id);
+            await CategoryRepository.RemoveByIdAsync(id);
             await UnitOfWork.SaveChangesAsync();
             return result.WithSuccess("Category Deleted");
         }
         public async Task<Result> ActiveAsync(Guid id)
         {
             var result = new Result();
-            var category = await UnitOfWork.CategoryRepository.FindByIdAsync(id);
+            var category = await CategoryRepository.FindByIdAsync(id);
             if (category == null)
             {
                 return result.WithError("Category Not Found");
@@ -87,14 +90,14 @@ namespace Application.Services
                 return result.WithError("This Category Is Already Active!");
             }
             category.IsActive = true;
-            await UnitOfWork.CategoryRepository.UpdateAsync(category);
+            await CategoryRepository.UpdateAsync(category);
             await UnitOfWork.SaveChangesAsync();
             return result;
         }
         public async Task<Result> InActiveAsync(Guid id)
         {
             var result = new Result();
-            var category = await UnitOfWork.CategoryRepository.FindByIdAsync(id);
+            var category = await CategoryRepository.FindByIdAsync(id);
             if (category == null)
             {
                 return result.WithError("Category Not Found");
@@ -104,7 +107,7 @@ namespace Application.Services
                 return result.WithError("This Category Is Already InActive!");
             }
             category.IsActive = false;
-            await UnitOfWork.CategoryRepository.UpdateAsync(category);
+            await CategoryRepository.UpdateAsync(category);
             await UnitOfWork.SaveChangesAsync();
             return result;
         }

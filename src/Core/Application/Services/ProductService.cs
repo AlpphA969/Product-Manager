@@ -20,12 +20,14 @@ public class ProductService : IProductService
         UnitOfWork = unitofwork;
         ProductRepository = unitofwork.ProductRepository;
         CategoryRepository = unitofwork.CategoryRepository;
+        ProductCategoryRepository = unitofwork.ProductCategoryRepository;
 
     }
     private IMapper Mapper { get; }
 
     IProductRepository ProductRepository { get; }
     ICategoryRepository CategoryRepository { get; }
+    IProductCategoryRepository ProductCategoryRepository { get; }
     private IUnitOfWork UnitOfWork { get; }
     public async Task<Result> AddProductAsync(ProductViewModel productviewmodel)
     {
@@ -48,7 +50,7 @@ public class ProductService : IProductService
             product.ProductCategories.Add(new ProductCategory(productid: product.Id, categoryid: Guid.Parse(categoryid)));
 
         }
-        await UnitOfWork.ProductRepository.AddAsync(product);
+        await ProductRepository.AddAsync(product);
         await UnitOfWork.SaveChangesAsync();
         return result.WithSuccess("Product Created");
 
@@ -58,16 +60,16 @@ public class ProductService : IProductService
     public async Task<Result> DeleteAsync(Guid id)
     {
         var result = new Result();
-        var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
+        var product = await ProductRepository.FindByIdAsync(id);
 
         if (product == null)
         {
              return result.WithError("Product Not found");
         }
         // حذف از جدول پروداکت
-        await UnitOfWork.ProductRepository.RemoveAsync(product);
+        await ProductRepository.RemoveAsync(product);
         //حذف از جدول پروداکت کتگوری
-        var productcatgorylist = await UnitOfWork.ProductCategoryRepository.FindAllByProductIdAsync(id);
+        var productcatgorylist = await ProductCategoryRepository.FindAllByProductIdAsync(id);
         await UnitOfWork.ProductCategoryRepository.DeleteRangeAsync(productcatgorylist);
         await UnitOfWork.SaveChangesAsync();
         return result;
@@ -84,7 +86,7 @@ public class ProductService : IProductService
 
 
 
-        var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
+        var product = await ProductRepository.FindByIdAsync(id);
 
 
 
@@ -92,12 +94,12 @@ public class ProductService : IProductService
         {
             return result.WithError("Product not found");
         }
-        var categoriesid = await UnitOfWork.ProductCategoryRepository.FindCategoriesByProductIdAsync(id);
+        var categoriesid = await ProductCategoryRepository.FindCategoriesByProductIdAsync(id);
         if (categoriesid.Count == 0)
         {
             return result.WithError("This Product Doesn't Have a Category");
         }
-        var anyactive = await UnitOfWork.CategoryRepository.AnyActiveAsync(categoriesid);
+        var anyactive = await CategoryRepository.AnyActiveAsync(categoriesid);
         if (anyactive == false)
         {
             return result.WithError("Not Found(No Category Active)");
@@ -117,7 +119,7 @@ public class ProductService : IProductService
     {
         var result = new Result();
 
-        var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
+        var product = await ProductRepository.FindByIdAsync(id);
         if (product == null)
         {
             return result.WithError("product not found");
@@ -142,7 +144,7 @@ public class ProductService : IProductService
             product.ImageUrl = model.ImageUrl;
         }
         product.UpdateDateTime = DateTime.Now;
-        await UnitOfWork.ProductRepository.UpdateAsync(product);
+        await ProductRepository.UpdateAsync(product);
         await UnitOfWork.SaveChangesAsync();
         return result;
 
@@ -172,14 +174,14 @@ public class ProductService : IProductService
         {
             return result.WithError("price requerd");
         }
-        var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
+        var product = await ProductRepository.FindByIdAsync(id);
         if (product == null)
         {
              return result.WithError("Not Found");
 
         }
         product.Price = updatePriceViewModel.Price;
-        await UnitOfWork.ProductRepository.UpdateAsync(product);
+        await ProductRepository.UpdateAsync(product);
         await UnitOfWork.SaveChangesAsync();
         return result;
 
@@ -193,13 +195,13 @@ public class ProductService : IProductService
              return result.WithError("InStockCount Requerd");
 
         }
-        var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
+        var product = await ProductRepository.FindByIdAsync(id);
         if (product == null)
         {
            return result.WithError("Not Found");
         }
         product.InStockCount = updateInStockCountViewModel.InStockCount;
-        await UnitOfWork.ProductRepository.UpdateInStockCountAsync(product);
+        await ProductRepository.UpdateInStockCountAsync(product);
         await UnitOfWork.SaveChangesAsync();
         return result;
     }
@@ -215,7 +217,7 @@ public class ProductService : IProductService
         {
             return result.WithError("categoriesid list can't be empty");
         }
-        var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
+        var product = await ProductRepository.FindByIdAsync(id);
 
         if (product == null)
         {
@@ -225,14 +227,14 @@ public class ProductService : IProductService
 
 
         // چک کردن موجودیت کنگوری
-        var categories = await UnitOfWork.CategoryRepository.FindByCategoriesId(categoriesid);
+        var categories = await CategoryRepository.FindByCategoriesId(categoriesid);
         if (categories.Count != categoriesid.Count)
         {
             return result.WithError("Enter Proper Category Id");
         }
         var ProductCategoryList = new List<ProductCategory>();
         // چک کردن تکراری نبودن کتگوری 
-        var DatabaseCategory = await UnitOfWork.ProductCategoryRepository.FindCategoriesByProductIdAsync(id);
+        var DatabaseCategory = await ProductCategoryRepository.FindCategoriesByProductIdAsync(id);
         var newCategoryIds = categoriesid.Except(DatabaseCategory);
         foreach (var x in newCategoryIds)
         {
@@ -240,7 +242,7 @@ public class ProductService : IProductService
         }
 
 
-        await UnitOfWork.ProductCategoryRepository.AddRangeAsync(ProductCategoryList);
+        await ProductCategoryRepository.AddRangeAsync(ProductCategoryList);
 
 
 
@@ -257,7 +259,7 @@ public class ProductService : IProductService
     public async Task<Result> DeleteProductCategoriesAsync(Guid id, List<string> categoriesid)
     {
         var result = new Result();
-        var product = await UnitOfWork.ProductRepository.FindByIdAsync(id);
+        var product = await ProductRepository.FindByIdAsync(id);
         if (product == null)
         {
             return result.WithError("Product Not Found");
@@ -268,7 +270,7 @@ public class ProductService : IProductService
         }
         
         // چک کردن اینکه ایا این کتگوری هایی که فرستاده وجود دارن یا نه 
-        var category =  await UnitOfWork.CategoryRepository.FindByCategoriesId(categoriesid);
+        var category =  await CategoryRepository.FindByCategoriesId(categoriesid);
         var wrongcategoriesid = categoriesid.Except(category);
         if(categoriesid.Count != category.Count)
         {
@@ -276,7 +278,7 @@ public class ProductService : IProductService
         }
 
         // چک کردن اینکه ایا این پروداکت این کتگوری هارو داره که میخاد پاک بشه 
-        var categories = await UnitOfWork.ProductCategoryRepository.FindCategoriesByProductIdAsync(id);
+        var categories = await ProductCategoryRepository.FindCategoriesByProductIdAsync(id);
         // چک کردن اینکه ایا این پروداکت دارای کتگورهای ورودی هست یا نه 
         bool checklist = true;
         foreach (var x in categoriesid)
@@ -293,12 +295,12 @@ public class ProductService : IProductService
             return result.WithError("Inset Proper Categories");
         }
         //گرفتن کتگوری های پروداکت و فیلتر کردن اونایی که میخایم پاک کنیم 
-        var productcategorylist = await UnitOfWork.ProductCategoryRepository.FindAllByProductIdAsync(id);
+        var productcategorylist = await ProductCategoryRepository.FindAllByProductIdAsync(id);
         var filterdproductcategorylist = productcategorylist
             .Where(x => categoriesid.Contains(x.CategoryId.ToString())).ToList(); 
         
 
-        await UnitOfWork.ProductCategoryRepository.DeleteRangeAsync(filterdproductcategorylist);
+        await ProductCategoryRepository.DeleteRangeAsync(filterdproductcategorylist);
         await UnitOfWork.SaveChangesAsync();
         return result;
 
@@ -322,9 +324,9 @@ public class ProductService : IProductService
             return result.WithError("page must be more than 0");
 
         }
-        int totalcount = await UnitOfWork.ProductRepository.CountAsync();
+        int totalcount = await ProductRepository.CountAsync();
         int pagecount = (int)Math.Ceiling((double)totalcount / pagesize);
-        var products = await UnitOfWork.ProductRepository.PaginationGet(page: page, pagesize: pagesize);
+        var products = await ProductRepository.PaginationGet(page: page, pagesize: pagesize);
         if (products == null)
         {
             return result.WithError("Nothing Found!");
