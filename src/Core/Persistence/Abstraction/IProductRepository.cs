@@ -9,7 +9,7 @@ public interface IProductRepository : IRepository<Product>
     Task<PageDataModel<Product>> GetAllAsync(ProductFiltersViewModel query , int  page , int pagesie , CancellationToken cancellationToken = default);
     Task PriceUpdateAsync(Product product);
     Task UpdateInStockCountAsync(Product product);
-    Task<int> CountAsync(ProductFiltersViewModel query, CancellationToken cancellationToken = default);
+   
     Task<List<ProductCategory>> GetAllProductCategoryAsync(Guid id); 
 
 

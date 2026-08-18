@@ -63,17 +63,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
     {
         await Task.Run(() => DbSet.Update(product));
     }
-    public async Task<int> CountAsync(ProductFiltersViewModel query, CancellationToken cancellationToken = default)
-    {
-        return await DbSet
-            .Where(x => query.name == null || x.Name.Contains(query.name))
-            .Where(x => query.color == null || x.Color.Contains(query.color))
-            .Where(x => query.MinPrice == null || x.Price >= query.MinPrice)
-            .Where(x => query.MaxPrice == null || x.Price <= query.MaxPrice)
-            .Where(x => query.categoriesId == null || !query.categoriesId.Any() ||
-                        x.ProductCategories.Any(c => query.categoriesId.Contains(c.CategoryId)))
-            .CountAsync(cancellationToken);
-    }
+    
 
     public async Task<List<ProductCategory>> GetAllProductCategoryAsync(Guid id)
     {
