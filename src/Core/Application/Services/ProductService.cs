@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Abstractions;
 using Models.ViewModel;
 using Persistence;
 using Persistence.Abstraction;
+using System.Collections;
 
 namespace Application.Services;
 
@@ -205,7 +206,7 @@ public class ProductService : IProductService
     public async Task<Result> AddCategoryToTheProduct(Guid id, List<string> categoriesid)
     {
         var result = new Result();
-        Console.WriteLine("function dare ejra mishe!!!!!!!!!!!!!!!1");
+       
         if (id == Guid.Empty)
         {
             return result.WithError("Id requierd!!");
@@ -265,20 +266,39 @@ public class ProductService : IProductService
         {
             return result.WithError("Categories Can't Be Empty");
         }
+        
+        // چک کردن اینکه ایا این کتگوری هایی که فرستاده وجود دارن یا نه 
+        var category =  await UnitOfWork.CategoryRepository.FindByCategoriesId(categoriesid);
+        var wrongcategoriesid = categoriesid.Except(category);
+        if(categoriesid.Count != category.Count)
+        {
+            return result.WithError(wrongcategoriesid.ToString() + "these categories dosen't exist" );
+        }
+
+        // چک کردن اینکه ایا این پروداکت این کتگوری هارو داره که میخاد پاک بشه 
         var categories = await UnitOfWork.ProductCategoryRepository.FindCategoriesByProductIdAsync(id);
-        if (categories.Count != categoriesid.Count)
+        // چک کردن اینکه ایا این پروداکت دارای کتگورهای ورودی هست یا نه 
+        bool checklist = true;
+        foreach (var x in categoriesid)
+        {
+            if (!(categories.Contains(x)))
+            {
+                checklist = false;
+                break;
+            }
+        }
+
+        if (checklist==false)
         {
             return result.WithError("Inset Proper Categories");
         }
-
-
+        //گرفتن کتگوری های پروداکت و فیلتر کردن اونایی که میخایم پاک کنیم 
         var productcategorylist = await UnitOfWork.ProductCategoryRepository.FindAllByProductIdAsync(id);
-        if (productcategorylist.Count != categoriesid.Count)
-        {
-            return result.WithError("Enter Proper Categories");
-        }
+        var filterdproductcategorylist = productcategorylist
+            .Where(x => categoriesid.Contains(x.CategoryId.ToString())).ToList(); 
+        
 
-        await UnitOfWork.ProductCategoryRepository.DeleteRangeAsync(productcategorylist);
+        await UnitOfWork.ProductCategoryRepository.DeleteRangeAsync(filterdproductcategorylist);
         await UnitOfWork.SaveChangesAsync();
         return result;
 
