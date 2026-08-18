@@ -75,6 +75,13 @@ public class ProductRepository : Repository<Product>, IProductRepository
             .CountAsync(cancellationToken);
     }
 
+    public async Task<List<ProductCategory>> GetAllProductCategoryAsync(Guid id)
+    {
+        var product = await FindByIdAsync(id);
+        
+        var result = product.ProductCategories;
+        return result;
+    }
 }
 
 public static class test

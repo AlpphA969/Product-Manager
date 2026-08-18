@@ -1,5 +1,6 @@
 using Domain.Entity;
 using Models.ViewModel;
+using Persistence.Repository;
 
 namespace Persistence.Abstraction;
 
@@ -9,7 +10,7 @@ public interface IProductRepository : IRepository<Product>
     Task PriceUpdateAsync(Product product);
     Task UpdateInStockCountAsync(Product product);
     Task<int> CountAsync(ProductFiltersViewModel query, CancellationToken cancellationToken = default);
-
+    Task<List<ProductCategory>> GetAllProductCategoryAsync(Guid id); 
 
 
 
