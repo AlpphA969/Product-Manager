@@ -15,5 +15,6 @@ namespace Models.ViewModel
         public int PageCount { get; set; }
         public int TotalCount { get; set; }
         public List<T> data { get; set; } = new List<T>();
+        
     }
 }

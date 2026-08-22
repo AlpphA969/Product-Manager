@@ -1,26 +1,22 @@
 using Application.Abstraction;
 using AutoMapper;
-using Azure;
 using Domain.Entity;
 using FluentResults;
-using Microsoft.Identity.Client;
-using Microsoft.IdentityModel.Abstractions;
 using Models.ViewModel;
 using Persistence;
 using Persistence.Abstraction;
-using System.Collections;
 
 namespace Application.Services;
 
 public class ProductService : IProductService
 {
-    public ProductService(IMapper mapper, IUnitOfWork unitofwork)
+    public ProductService(IMapper mapper, IUnitOfWork unitOfWork)
     {
         Mapper = mapper;
-        UnitOfWork = unitofwork;
-        ProductRepository = unitofwork.ProductRepository;
-        CategoryRepository = unitofwork.CategoryRepository;
-        ProductCategoryRepository = unitofwork.ProductCategoryRepository;
+        UnitOfWork = unitOfWork;
+        ProductRepository = unitOfWork.ProductRepository;
+        CategoryRepository = unitOfWork.CategoryRepository;
+        ProductCategoryRepository = unitOfWork.ProductCategoryRepository;
 
     }
     private IMapper Mapper { get; }
@@ -36,8 +32,10 @@ public class ProductService : IProductService
 
         var product = Mapper.Map<Product>(productviewmodel);
 
-        // اضاف کردن پرداکت ای دی ها به پروداکت کتگوری
+        // اضاف کردن کتگوری ای دی ها به پروداکت کتگوری
+        // چک کردن اینکه ایا این کتگوری ها وجود دارن یا نه 
 
+      
         var categories = await CategoryRepository.FindByCategoriesId(productviewmodel.CategoriesId);
 
         if (categories.Count != productviewmodel.CategoriesId.Count)
